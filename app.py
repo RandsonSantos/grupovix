@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 # 🔧 Configuração do banco
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://db_grupovix_user:fEqgm3in39AmzWb4fQ3Omsowxrd5hDSl@dpg-d21pb77fte5s73ftcl7g-a/db_grupovix'
+app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://db_grupovix_user:fEqgm3in39AmzWb4fQ3Omsowxrd5hDSl@dpg-d21pb77fte5s73ftcl7g-a.oregon-postgres.render.com/db_grupovix'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'sua_chave_super_secreta'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
