@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<body>
+    <h2>Digite a Senha para Acessar </h2>
+    <form action="{{ url_for('verificar_senha') }}" method="POST">
+        <input type="password" name="senha_master" required>
+        <button type="submit">Entrar</button>
+    </form>
+</body>
+{% endblock %}
+
+
+
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <title>Autenticação</title>
+</head>
+</html>
+
+
+
+
+
+<form action="{{ url_for('verificar_senha') }}" method="POST">
+    <label>Digite a Senha Master:</label>
+    <input type="password" name="senha_master" required>
+    <button type="submit">Entrar</button>
+</form>

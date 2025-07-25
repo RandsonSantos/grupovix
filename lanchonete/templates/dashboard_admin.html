@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Painel Administrativo - Grupo Vix{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+  <!-- 🔝 Título + resumo global -->
+  <div class="text-center mb-4">
+    <h2 class="mb-2">📊 Painel Administrativo</h2>
+    <p class="text-muted">Resumo operacional de todas as lojas e alertas críticos de estoque</p>
+  </div>
+    <!-- 🎛️ Atalhos Administrativos -->
+    <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">🔧 Operações</div>
+            <div class="card-body d-grid gap-2">
+              <a href="{{ url_for('home') }}" class="btn btn-outline-primary">📦 Frente de Caixa</a>
+              <a href="{{ url_for('estoque') }}" class="btn btn-outline-primary">📦 Estoque</a>
+              <a href="{{ url_for('controle_caixa') }}" class="btn btn-outline-dark">💰 Caixa</a>
+            </div>
+          </div>
+        </div>
+    
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">📊 Relatórios</div>
+            <div class="card-body d-grid gap-2">
+              <a href="{{ url_for('vendas') }}" class="btn btn-outline-success">📈 Vendas</a>
+              <a href="{{ url_for('relatorio_vendas') }}" class="btn btn-outline-dark">📄 Relatórios</a>
+              <a href="{{ url_for('estoque_por_loja') }}" class="btn btn-outline-secondary">🏬 Estoque por Loja</a>
+            </div>
+          </div>
+        </div>
+    
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">👥 Gestão</div>
+            <div class="card-body d-grid gap-2">
+              <a href="{{ url_for('listar_clientes') }}" class="btn btn-outline-warning">📁 Clientes</a>
+              <a href="{{ url_for('listar_usuarios') }}" class="btn btn-outline-danger">👥 Usuários</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+  <!-- 🌍 Indicadores Globais -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-info">
+        <div class="card-body">
+          <h5 class="card-title text-info text-center mb-3">🌐 Todas as Lojas</h5>
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between">
+              Vendas Finalizadas: <strong>{{ pedidos_global | default(0) }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              Faturamento Geral: <strong>R$ {{ '%.2f' % faturamento_global | default(0) }}</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm border-danger h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <h5 class="card-title text-center text-danger mb-3">🔍 Alertas de Estoque</h5>
+          <p class="text-muted text-center">Veja todos os produtos com estoque crítico</p>
+          <a href="{{ url_for('alertas_estoque') }}" class="btn btn-outline-danger w-100">Ver Detalhes</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 🚨 Estoque Baixo por Loja -->
+  {% if alertas_por_loja %}
+  <div class="row g-4 mb-5">
+    {% for loja_nome, produtos in alertas_por_loja.items() %}
+    <div class="col-md-6">
+      <div class="card border-danger shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title text-danger mb-3">⚠️ Estoque Crítico – {{ loja_nome }}</h5>
+          <ul class="list-group">
+            {% for produto in produtos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ produto.nome }}</strong><br>
+                <small class="text-muted">Mínimo: {{ produto.estoque_minimo }}</small>
+              </div>
+              {% if produto.estoque == 0 %}
+                <span class="badge bg-dark rounded-pill">⚫ Esgotado</span>
+              {% else %}
+                <span class="badge bg-danger rounded-pill">{{ produto.estoque }} un.</span>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+{% endblock %}

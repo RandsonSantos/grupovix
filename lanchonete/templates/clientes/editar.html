@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Editar Cliente - Grupo Vix{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h3 class="mb-4 text-center">✏️ Editar Cliente</h3>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="{{ url_for('editar_cliente', id=cliente.id) }}">
+    <div class="mb-3">
+      <label for="nome" class="form-label">Nome do Cliente:</label>
+      <input type="text" name="nome" value="{{ cliente.nome }}" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-success">💾 Salvar Alterações</button>
+    <a href="{{ url_for('listar_clientes') }}" class="btn btn-secondary ms-2">⬅️ Voltar</a>
+  </form>
+</div>
+{% endblock %}

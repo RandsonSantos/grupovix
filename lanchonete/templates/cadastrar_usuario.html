@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Usuário - Grupo Vix{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h4 class="text-center mb-4">Cadastrar Novo Usuário</h4>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('cadastrar_usuario') }}">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome:</label>
+                            <input type="text" name="nome" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-mail:</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="senha" class="form-label">Senha:</label>
+                            <input type="password" name="senha" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tipo" class="form-label">Tipo de Usuário:</label>
+                            <select name="tipo" id="tipo_usuario" class="form-select" required>
+                                <option value="atendimento">Atendimento</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="loja_container">
+                            <label for="loja_id" class="form-label">Loja:</label>
+                            <select name="loja_id" class="form-select">
+                                <option value="" disabled selected>Selecione uma loja</option>
+                                {% for loja in lojas %}
+                                    <option value="{{ loja.id }}">{{ loja.nome }} - {{ loja.endereco }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success">Cadastrar Usuário</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🧠 Script para exibir/esconder loja -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tipoSelect = document.getElementById("tipo_usuario");
+    const lojaContainer = document.getElementById("loja_container");
+
+    function atualizarCampoLoja() {
+      if (tipoSelect.value === "admin") {
+        lojaContainer.style.display = "none";
+        lojaContainer.querySelector("select").removeAttribute("required");
+      } else {
+        lojaContainer.style.display = "block";
+        lojaContainer.querySelector("select").setAttribute("required", "required");
+      }
+    }
+
+    tipoSelect.addEventListener("change", atualizarCampoLoja);
+    atualizarCampoLoja();  // aplica na inicialização
+  });
+</script>
+{% endblock %}

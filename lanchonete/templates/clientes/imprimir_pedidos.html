@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Impressão - Pedidos de {{ cliente.nome }}{% endblock %}
+{% block content %}
+
+<style>
+  @media print {
+    .no-print { display: none; }
+    body {
+      font-size: 11pt;
+      margin: 0;
+      padding: 1rem;
+      color: #000;
+    }
+    h4, h5, p { margin-bottom: 0.4rem; }
+    table { width: 100%; border-collapse: collapse; }
+    table td, table th {
+      font-size: 10.5pt;
+      border: 1px solid #ccc;
+      padding: 4px;
+      text-align: left;
+    }
+  }
+</style>
+
+<div class="container mt-4">
+
+  <!-- 🔧 Topo da página -->
+  <div class="no-print d-flex justify-content-between align-items-center mb-3">
+    <h4 class="m-0">📄 Relatório de Pedidos</h4>
+    <div>
+      <button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir Agora</button>
+      <a href="{{ url_for('pedidos_do_cliente', cliente_id=cliente.id) }}" class="btn btn-secondary">⬅️ Voltar</a>
+    </div>
+  </div>
+
+  <!-- 🔍 Filtro -->
+  <form method="GET" class="no-print mb-3 row g-2">
+    <input type="hidden" name="imprimir" value="1">
+    <div class="col-md-3">
+      <label for="status" class="form-label"><strong>Status:</strong></label>
+      <select name="status" id="status" class="form-select">
+        <option value="">Todos</option>
+        <option value="finalizado" {% if status == "finalizado" %}selected{% endif %}>✅ Finalizado</option>
+        <option value="cancelado" {% if status == "cancelado" %}selected{% endif %}>❌ Cancelado</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="data_inicio" class="form-label"><strong>Data Início:</strong></label>
+      <input type="date" name="data_inicio" id="data_inicio" class="form-control"
+             value="{{ data_inicio or '' }}">
+    </div>
+    <div class="col-md-3">
+      <label for="data_fim" class="form-label"><strong>Data Fim:</strong></label>
+      <input type="date" name="data_fim" id="data_fim" class="form-control"
+             value="{{ data_fim or '' }}">
+    </div>
+    <div class="col-md-3 align-self-end">
+      <button type="submit" class="btn btn-outline-primary w-100">🔄 Atualizar</button>
+    </div>
+  </form>
+
+  <!-- 🧾 Cabeçalho -->
+  <h5><strong>Cliente:</strong> {{ cliente.nome }}</h5>
+  {% if status %}
+    <p><strong>Status filtrado:</strong> {{ status|capitalize }}</p>
+  {% endif %}
+  {% if data_inicio and data_fim %}
+    <p><strong>Período:</strong> {{ data_inicio }} até {{ data_fim }}</p>
+  {% endif %}
+  <p><strong>Data da impressão:</strong> {{ agora.strftime('%d/%m/%Y %H:%M') }}</p>
+  <hr>
+
+  <!-- 📋 Tabela de pedidos -->
+  {% if pedidos %}
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Data</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Pagamento</th>
+          <th>Forma</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pedido in pedidos %}
+        <tr>
+          <td>{{ pedido.id }}</td>
+          <td>{{ pedido.data.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>R$ {{ '%.2f' % pedido.total }}</td>
+          <td>{{ pedido.status|capitalize }}</td>
+          <td>
+            {% if pedido.fiado %}
+              🧾 Fiado
+            {% else %}
+              💰 Pago
+            {% endif %}
+          </td>
+          <td>{{ pedido.forma_pagamento or '❌' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- 📊 Resumo -->
+    <div class="mt-4">
+      <h5><strong>Resumo Financeiro</strong></h5>
+      <table class="table table-sm w-100">
+        <tbody>
+          <tr>
+            <td><strong>Total Geral:</strong></td>
+            <td>R$ {{ '%.2f' % resumo.total_geral }}</td>
+          </tr>
+          <tr>
+            <td><strong>Total Fiado:</strong></td>
+            <td>R$ {{ '%.2f' % resumo.total_fiado }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="mt-2"><strong>Por Status:</strong></h6>
+          <ul>
+            {% for nome, valor in resumo.por_status.items() %}
+              <li>{{ nome|capitalize }}: R$ {{ '%.2f' % valor }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h6 class="mt-2"><strong>Por Forma de Pagamento:</strong></h6>
+          <ul>
+            {% for forma, valor in resumo.por_forma_pagamento.items() %}
+              <li>{{ forma|capitalize }}: R$ {{ '%.2f' % valor }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning">Nenhum pedido encontrado para esse filtro.</div>
+  {% endif %}
+
+</div>
+{% endblock %}

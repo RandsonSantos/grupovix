@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cupom de Compra</title>
+    
+    <!-- Importando CSS espec├¡fico -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='cupom.css') }}">
+    <style>
+        /* Estilos para impress├úo */
+        @media print {
+            .no-print { display: none; } 
+            .cupom-container { width: 150mm; padding: 10px; text-align: center; }
+            h2, h4 { font-size: 16px; }
+            p, td, th { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Estrutura do Cupom -->
+    <div class="cupom-container border p-3">
+        <h2 class="text-center">RECIBO</h2>
+        <hr>
+
+        <p><strong>ID Pedido:</strong> {{ pedido.id }}</p>
+        <p><strong>Data:</strong> {{ pedido.data.strftime('%d/%m/%Y %H:%M:%S') }}</p>
+        <hr>
+
+        <h4>Itens Comprados:</h4>
+        <table class="table table-sm table-borderless text-center">
+            <thead class="bg-light">
+                <tr>
+                    <th>Produto</th>
+                    <th>Qtd</th>
+                    <th>Unitário</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in pedido.produtos %}
+                <tr>
+                    <td>{{ item.nome }}</td>
+                    <td>x{{ item.quantidade }}</td>
+                    <td>R$ {{ "%.2f"|format(item.preco) }}</td>
+                    <td>R$ {{ "%.2f"|format(item.preco * item.quantidade) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <hr>
+        <p><strong>Total:</strong> R$ {{ "%.2f"|format(pedido.total) }}</p>
+        <p><strong>Forma de Pagamento:</strong> {{ pedido.forma_pagamento }}</p>
+        <hr>
+
+        <p>Compra realizada com sucesso! Obrigado pela preferencia.</p>
+        <p>Grupo Vix</p>
+        <div class="text-center no-print mt-3">
+            <a href="{{ url_for('home') }}" class="botao botao-voltar">Voltar ao Home
+            </a>
+            <a href="#" onclick="window.print()" class="botao botao-imprimir">Imprimir Cupom
+            </a>
+        </div>
+                
+</body>
+</html>

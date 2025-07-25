@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Estoque{% endblock %}
+{% block content %}
+
+      <!-- Formulário para adicionar novo produto -->
+    <div class="card p-4 mb-4 shadow">
+        <h4 class="text-primary">Adicionar Novo Produto</h4>
+        <form action="{{ url_for('adicionar_produto') }}" method="POST" class="row g-2" onsubmit="setTimeout(() => { location.reload(); }, 700);">
+
+            <div class="col-md-4">
+                <input type="text" name="nome" class="form-control" placeholder="Nome do produto" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="preco" class="form-control" min="0" step="0.01" placeholder="Preço" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="estoque" class="form-control" min="1" placeholder="Quantidade" required>
+            </div>
+
+            {% if usuario.tipo == "admin" %}
+            <div class="col-md-3">
+                <select name="loja_id" class="form-select" required>
+                    <option value="" disabled selected>Selecione a loja</option>
+                    {% for loja in lojas %}
+                        <option value="{{ loja.id }}">{{ loja.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% else %}
+                <input type="hidden" name="loja_id" value="{{ usuario.loja_id }}">
+            {% endif %}
+
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-primary">➕</button>
+            </div>
+        </form>
+    </div>
+    {% if usuario.tipo == "admin" %}
+    <div class="card p-3 mb-4 shadow">
+      <form method="POST" action="{{ url_for('estoque') }}" class="row g-2">
+        <div class="col-md-10">
+          <select name="loja_id" class="form-select" required onchange="this.form.submit()">
+            <option value="" disabled selected>Filtrar por loja...</option>
+            {% for loja in lojas %}
+              <option value="{{ loja.id }}" {% if loja.id == loja_id %}selected{% endif %}>{{ loja.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-outline-primary">🔎 Filtrar</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+    
+    <div class="card mb-4 border-danger shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+        <h5 class="text-danger mb-0">📢 Atenção: produtos com estoque crítico</h5>
+        <a href="{{ url_for('alertas_estoque') }}" class="btn btn-outline-danger">🔍 Ver Alertas de Estoque</a>
+        </div>
+    </div>
+
+    <!-- Tabela de estoque -->
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    {% if usuario.tipo == "admin" %}
+                        <th>Loja</th>
+                    {% endif %}
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in produtos %}
+                <tr>
+                    <td>{{ produto.nome }}</td>
+                    <td>R$ {{ '%.2f' % produto.preco }}</td>
+                    <td>{{ produto.estoque }}</td>
+                    {% if usuario.tipo == "admin" %}
+                    <td>
+                        {{ produto.loja.nome }}<br>
+                        <small class="text-muted">{{ produto.loja.endereco }}</small>
+                    </td>
+                    {% endif %}
+                    <td class="d-flex">
+                        <a href="{{ url_for('ver_produto', id=produto.id) }}" class="btn btn-info btn-sm me-2">Ver</a>
+                        <a href="{{ url_for('editar_produto', id=produto.id) }}" class="btn btn-warning btn-sm me-2">Editar</a>
+                        <form method="POST" action="{{ url_for('excluir_produto', id=produto.id) }}" onsubmit="return confirm('Deseja excluir este produto?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

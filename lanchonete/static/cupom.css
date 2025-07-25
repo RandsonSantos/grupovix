@@ -1,0 +1,30 @@
+/* 🎨 Estilo dos botões */
+.botao {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    width: auto;
+}
+
+/* 🖨️ Botão de imprimir */
+.botao-imprimir {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #0056b3;
+}
+
+/* 🔙 Botão de voltar */
+.botao-voltar {
+    background-color: #6c757d;
+    color: white;
+    border: 1px solid #545b62;
+}
+
+/* 🖨️ Remove botões da impressão */
+@media print {
+    .no-print { display: none; }
+}
