@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Pedidos - {{ status|capitalize }}{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+  <h3>📋 Pedidos com status: <strong>{{ status|capitalize }}</strong></h3>
+
+  {% if pedidos %}
+    <table class="table table-striped mt-3">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Total</th>
+          <th>Fiado</th>
+          <th>Forma</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pedido in pedidos %}
+        <tr>
+          <td>{{ pedido.id }}</td>
+          <td>{{ pedido.cliente.nome if pedido.cliente else 'N/A' }}</td>
+          <td>R$ {{ pedido.total }}</td>
+          <td>{{ 'Sim' if pedido.fiado else 'Não' }}</td>
+          <td>{{ pedido.forma_pagamento }}</td>
+          <td>{{ pedido.data.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>
+            <a href="{{ url_for('cupom', id=pedido.id) }}" class="btn btn-sm btn-outline-secondary">🔍 Ver</a>
+            <a href="{{ url_for('cupom', id=pedido.id) }}?imprimir=1" target="_blank" class="btn btn-sm btn-outline-info">🖨️ Imprimir</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info mt-3">Nenhum pedido com status <strong>{{ status }}</strong> encontrado.</div>
+  {% endif %}
+
+  <a href="{{ url_for('listar_clientes') }}" class="btn btn-secondary mt-4">⬅️ Voltar</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Grupo Vix - Home{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2 class="text-center mb-4">🛒 Iniciar Pedido</h2>
+
+  <!-- 🔎 Busca de Produto -->
+  <input type="text" id="produto-input" class="form-control mb-3" placeholder="🔍 Procurar produto..." oninput="filtrarProdutos()">
+
+  <!-- 📦 Lista de Produtos -->
+  <div id="tabela-produtos" style="display: none;">
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Estoque</th>
+          <th>Adicionar</th>
+        </tr>
+      </thead>
+      <tbody id="lista-produtos">
+        {% for produto in produtos %}
+        <tr class="produto-item">
+          <td>{{ produto.nome }}</td>
+          <td>R$ {{ '%.2f' % produto.preco }}</td>
+          <td id="estoque_{{ produto.id }}">{{ produto.estoque }}</td>
+          <td>
+            <input type="number" min="1" max="{{ produto.estoque }}" value="1" id="quantidade_{{ produto.id }}" class="form-control">
+            <button class="btn btn-primary btn-sm mt-2"
+              onclick="adicionarAoPedido('{{ produto.id }}', '{{ produto.nome | escape }}', parseFloat('{{ produto.preco }}'), document.getElementById('quantidade_{{ produto.id }}').value)">
+              ➕ Adicionar
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 🧾 Pedido Atual -->
+  <div class="bg-light p-3 rounded mt-4">
+    <h4>📋 Pedido Atual</h4>
+    <div id="lista-pedido" class="d-flex flex-wrap gap-2"></div>
+    <div class="mt-3 p-3 bg-success text-white text-center rounded shadow">
+      <h3><strong>Total: R$ <span id="total">0.00</span></strong></h3>
+    </div>
+  </div>
+
+  <!-- 💳 Finalização -->
+  <form action="{{ url_for('processar_venda') }}" method="POST" onsubmit="return validarPagamento()">
+    <input type="hidden" name="pedido" id="pedido-input">
+    <input type="hidden" name="forma_pagamento" id="forma-pagamento">
+    <input type="hidden" name="cliente_id" id="cliente_id">
+
+    <!-- 🧾 Venda Fiado -->
+    <div class="form-check mt-4">
+      <input class="form-check-input" type="checkbox" name="fiado" id="fiado-checkbox" onchange="toggleClienteObrigatorio()">
+      <label class="form-check-label" for="fiado-checkbox">🧾 Venda Fiado</label>
+    </div>
+
+    <!-- 👤 Seleção de Cliente -->
+    <div class="mt-3">
+      <label><strong>👤 Buscar Cliente:</strong></label>
+      <div class="input-group">
+        <span class="input-group-text">🔍</span>
+        <input class="form-control" list="lista-clientes" id="cliente_busca" placeholder="Digite o nome...">
+      </div>
+      <datalist id="lista-clientes">
+        {% for cliente in clientes %}
+        <option data-id="{{ cliente.id }}" value="{{ cliente.nome }}">
+        {% endfor %}
+      </datalist>
+    </div>
+
+    <!-- 💰 Forma de Pagamento -->
+    <label class="mt-4"><strong>Forma de Pagamento:</strong></label>
+    <div class="btn-group d-flex justify-content-center flex-wrap gap-1" id="grupo-pagamento" role="group">
+      <button type="button" class="btn btn-outline-primary" onclick="selecionarPagamento('Dinheiro', this)">💵 Dinheiro</button>
+      <button type="button" class="btn btn-outline-success" onclick="selecionarPagamento('Cartão', this)">💳 Cartão</button>
+      <button type="button" class="btn btn-outline-warning" onclick="selecionarPagamento('PIX', this)">⚡ PIX</button>
+    </div>
+    <div id="erro-pagamento" class="text-danger mt-2" style="display: none;">
+      ⚠️ Selecione uma forma de pagamento antes de finalizar.
+    </div>
+
+    <button type="submit" class="btn btn-success w-100 mt-4">💳 Finalizar Venda</button>
+  </form>
+
+  <!-- 📜 Último Pedido -->
+  {% if ultimo_pedido %}
+  <div class="bg-light p-3 mt-4 rounded">
+    <h4>📜 Último Pedido</h4>
+    <ul class="list-group">
+    </ul>
+    <p class="mt-2"><strong>Pagamento:</strong> {{ ultimo_pedido.forma_pagamento }}</p>
+    <p><strong>Fiado:</strong> {{ 'Sim' if ultimo_pedido.fiado else 'Não' }}</p>
+    <p><strong>Cliente:</strong> {{ ultimo_pedido.cliente.nome if ultimo_pedido.cliente else 'N/A' }}</p>
+    <a href="{{ url_for('cupom', id=ultimo_pedido.id) }}" class="btn btn-info btn-sm" title="Ver cupom" target="_blank" rel="noopener">
+      🧾 Cupom
+    </a>
+  </div>
+
+  {% endif %}
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}" defer></script>
+
+
+<!-- 🧠 Scripts -->
+<script>
+    function toggleClienteObrigatorio() {
+      const fiadoCheckbox = document.getElementById("fiado-checkbox");
+      const grupoPagamento = document.getElementById("grupo-pagamento");
+      const formaPagamento = document.getElementById("forma-pagamento");
+      const erroPagamento = document.getElementById("erro-pagamento");
+      const clienteId = document.getElementById("cliente_id");
+  
+      if (!fiadoCheckbox || !grupoPagamento || !formaPagamento || !clienteId) return;
+  
+      const fiadoAtivo = fiadoCheckbox.checked;
+  
+      clienteId.required = fiadoAtivo;
+  
+      if (fiadoAtivo) {
+        grupoPagamento.style.display = "none";
+        erroPagamento.style.display = "none";
+        formaPagamento.value = "Fiado";
+      } else {
+        grupoPagamento.style.display = "flex";
+        formaPagamento.value = "";
+      }
+    }
+  
+    function validarPagamento() {
+      const fiado = document.getElementById("fiado-checkbox").checked;
+      const forma = document.getElementById("forma-pagamento").value;
+      const pedido = document.getElementById("pedido-input").value;
+      const clienteId = document.getElementById("cliente_id").value;
+  
+      if (!pedido || pedido === "[]" || pedido.length < 5) {
+        alert("Selecione ao menos um produto.");
+        return false;
+      }
+  
+      if (fiado) {
+        if (!clienteId) {
+          alert("Venda fiado exige a seleção de um cliente.");
+          return false;
+        }
+        return true;
+      }
+  
+      if (!forma) {
+        document.getElementById("erro-pagamento").style.display = "block";
+        return false;
+      }
+  
+      return true;
+    }
+  
+    document.getElementById("cliente_busca").addEventListener("change", function () {
+      const nome = this.value;
+      const options = document.getElementById("lista-clientes").options;
+      const clienteId = document.getElementById("cliente_id");
+      clienteId.value = "";
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].value === nome) {
+          clienteId.value = options[i].dataset.id;
+          break;
+        }
+      }
+    });
+  </script>
+
+{% endblock %}

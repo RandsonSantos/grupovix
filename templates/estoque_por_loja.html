@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Estoque por Loja - Grupo Vix{% endblock %}
+{% block content %}
+
+<div class="container py-4">
+    <h2 class="text-center mb-4">📦 Estoque por Loja</h2>
+
+<!-- Card de seleção com botões por loja -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body">
+        <h5 class="text-primary mb-3">Selecionar Loja</h5>
+        <form method="POST" action="{{ url_for('estoque_por_loja') }}">
+            <div class="row g-2">
+                {% for loja in lojas %}
+                <div class="col-md-6">
+                    <button type="submit" name="loja_id" value="{{ loja.id }}" class="btn btn-outline-primary w-100 text-start">
+                        <strong>🏪 {{ loja.nome }}</strong><br>
+                        <small class="text-muted">{{ loja.endereco }}</small>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+</div>
+
+    {% if loja %}
+    <!-- Card da loja selecionada -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h4 class="text-success mb-1">🏪 {{ loja.nome }}</h4>
+            <p class="text-muted mb-3">{{ loja.endereco }}</p>
+
+            <div class="d-flex justify-content-between mb-3">
+                <!-- Botão de adicionar produto -->
+                <a href="{{ url_for('estoque') }}" class="btn btn-success">
+                    ➕ Adicionar Produto para esta Loja
+                </a>
+
+                <!-- Botão de imprimir relatório -->
+                <form method="POST" action="{{ url_for('relatorio_produtos_loja') }}">
+                    <input type="hidden" name="loja_id" value="{{ loja.id }}">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        🖨️ Imprimir Relatório
+                    </button>
+                </form>
+            </div>
+
+            {% if produtos %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Preço (R$)</th>
+                            <th>Quantidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total_estoque = 0 %}
+                        {% for produto in produtos %}
+                        {% set total_estoque = total_estoque + produto.estoque %}
+                        <tr>
+                            <td>{{ produto.id }}</td>
+                            <td>{{ produto.nome }}</td>
+                            <td>{{ '%.2f' % produto.preco }}</td>
+                            <td>{{ produto.estoque }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info text-center mt-3">
+                Estoque total da loja <strong>{{ loja.nome }}</strong>: <strong>{{ total_estoque }}</strong> itens
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center mt-3">
+                ⚠️ Nenhum produto cadastrado nesta loja ainda.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

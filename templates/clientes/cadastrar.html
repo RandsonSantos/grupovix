@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Cadastrar Cliente{% endblock %}
+{% block content %}
+
+<div class="container d-flex justify-content-center mt-5">
+  <div class="card shadow p-4" style="max-width: 500px; width: 100%;">
+    
+    <h3 class="text-center mb-4">👤 Novo Cliente</h3>
+
+    <form action="{{ url_for('cadastrar_cliente') }}" method="POST">
+      <div class="mb-3">
+        <label for="nome" class="form-label">📝 Nome completo</label>
+        <input type="text" class="form-control" name="nome" id="nome" placeholder="Ex: João da Silva" required>
+      </div>
+
+      <!-- Espaço reservado para CPF, Telefone, etc. futuramente -->
+      <!--
+      <div class="mb-3">
+        <label for="cpf" class="form-label">CPF</label>
+        <input type="text" class="form-control" name="cpf" id="cpf" placeholder="000.000.000-00">
+      </div>
+      -->
+
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">💾 Salvar Cliente</button>
+        <a href="{{ url_for('dashboard_admin') }}" class="btn btn-outline-secondary">⬅️ Voltar ao Início</a>
+        <a href="{{ url_for('listar_clientes') }}" class="btn btn-outline-info w-100 mb-3">📁 Ver Clientes Cadastrados</a>
+      </div>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mt-4">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} fade show" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+  </div>
+</div>
+
+{% endblock %}

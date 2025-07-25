@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Clientes Cadastrados - Grupo Vix{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h3 class="mb-4 text-center">📁 Lista de Clientes</h3>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if clientes %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>Total de Pedidos</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cliente in clientes %}
+          <tr>
+            <td>{{ cliente.id }}</td>
+            <td>{{ cliente.nome }}</td>
+            <td>{{ cliente.pedidos.count() }}</td>
+            <td class="d-flex gap-2 flex-wrap">
+              <a href="{{ url_for('pedidos_do_cliente', cliente_id=cliente.id) }}" class="btn btn-sm btn-outline-primary">📄 Ver Pedidos</a>
+              <a href="{{ url_for('pedidos_do_cliente', cliente_id=cliente.id) }}?imprimir=1" class="btn btn-sm btn-outline-success" target="_blank">🖨️ Imprimir Todos</a>
+              <a href="{{ url_for('editar_cliente', id=cliente.id) }}" class="btn btn-sm btn-outline-warning">✏️ Editar</a>
+              <form method="POST" action="{{ url_for('excluir_cliente', id=cliente.id) }}" onsubmit="return confirm('Excluir cliente?')">
+                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Excluir</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">Nenhum cliente cadastrado ainda.</div>
+  {% endif %}
+
+  <div class="mt-4 d-flex flex-wrap justify-content-between gap-3">
+    <a href="{{ url_for('cadastrar_cliente') }}" class="btn btn-warning text-dark">👤 Cadastrar Cliente</a>
+    <a href="{{ url_for('dashboard_admin') }}" class="btn btn-secondary">⬅️ Voltar ao Painel</a>
+  </div>
+</div>
+{% endblock %}
